@@ -1,10 +1,8 @@
-lazy val root = (project in file(".")).
-  settings(
-    inThisBuild(List(
-      organization := "bg.yalishanda",
-      scalaVersion := "3.1.1"
-    )),
-    name := "scala-recsys"
-  )
+name := "scala-recsys"
+version := "0.1"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.9" % Test
+scalaVersion := "3.1.1"
+
+libraryDependencies ++= Seq(
+  "org.scalatest" %% "scalatest" % "3.2.9" % Test,
+)

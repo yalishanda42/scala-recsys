@@ -1,7 +1,7 @@
 {
     "version": "1.4.0",
     "project": {
-        "name": "root-test",
+        "name": "scala-recsys-test",
         "directory": "/Users/yalishanda/Documents/scala-recsys",
         "workspaceDir": "/Users/yalishanda/Documents/scala-recsys",
         "sources": [
@@ -11,10 +11,10 @@
             "/Users/yalishanda/Documents/scala-recsys/target/scala-3.1.1/src_managed/test"
         ],
         "dependencies": [
-            "root"
+            "scala-recsys"
         ],
         "classpath": [
-            "/Users/yalishanda/Documents/scala-recsys/.bloop/root/scala-3/classes",
+            "/Users/yalishanda/Documents/scala-recsys/.bloop/scala-recsys/scala-3/classes",
             "/Users/yalishanda/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala3-library_3/3.1.1/scala3-library_3-3.1.1.jar",
             "/Users/yalishanda/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest_3/3.2.9/scalatest_3-3.2.9.jar",
             "/Users/yalishanda/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.6/scala-library-2.13.6.jar",
@@ -35,8 +35,8 @@
             "/Users/yalishanda/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest-compatible/3.2.9/scalatest-compatible-3.2.9.jar",
             "/Users/yalishanda/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_3/2.0.0/scala-xml_3-2.0.0.jar"
         ],
-        "out": "/Users/yalishanda/Documents/scala-recsys/.bloop/root",
-        "classesDir": "/Users/yalishanda/Documents/scala-recsys/.bloop/root/scala-3/test-classes",
+        "out": "/Users/yalishanda/Documents/scala-recsys/.bloop/scala-recsys",
+        "classesDir": "/Users/yalishanda/Documents/scala-recsys/.bloop/scala-recsys/scala-3/test-classes",
         "resources": [
             "/Users/yalishanda/Documents/scala-recsys/src/test/resources",
             "/Users/yalishanda/Documents/scala-recsys/target/scala-3.1.1/resource_managed/test"
