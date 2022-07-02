@@ -19,6 +19,9 @@ project/plugins/project/
 .cache
 .lib/
 
+### Bloop ###
+.bloop/
+
 ### Scala ###
 *.class
 *.log
