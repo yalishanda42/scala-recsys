@@ -12,8 +12,12 @@ object RecommenderApp extends IOApp:
             "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/ALSmodel"
           )
           for {
+            _ <- IO(println("Preparing and checkpointing data..."))
+            _ <- IO(sc.setCheckpointDir("/Users/yalishanda/Documents/scala-recsys/data/ml-100k/checkpoint"))
+            data <- IO(trainer.prepareData(Utils.stringToRatingMapper))
+            _ <- IO(data.checkpoint)
             _ <- IO(println("Training model..."))
-            model <- IO(trainer.train(Utils.stringToRatingMapper))
+            model <- IO(trainer.train(data))
             _ <- IO(println("Saving model..."))
             result <- IO(trainer.saveModel(model))
           } yield (

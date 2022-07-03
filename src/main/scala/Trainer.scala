@@ -10,19 +10,11 @@ class Trainer(sc: SparkContext, dataPath: String, modelPath: String):
 
   def train(
     ratings: RDD[Rating],
-    rank: Int,
-    iteration: Int,
-    lambda: Double
-  ): MatrixFactorizationModel =
-    ALS.train(ratings, rank, iteration, lambda) // TODO: allow for different algos
-
-  def train(
-    lineMapper: String => Rating,
     rank: Int = 50,
     iteration: Int = 20,
     lambda: Double = 0.1
   ): MatrixFactorizationModel =
-    train(prepareData(lineMapper), rank, iteration, lambda)
+    ALS.train(ratings, rank, iteration, lambda) // TODO: allow for different algos
 
   def saveModel(model: MatrixFactorizationModel): Try[Unit] =
     Try(model.save(sc, modelPath))
