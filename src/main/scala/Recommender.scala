@@ -1,3 +1,2 @@
-class Recommender {
-
-}
+object Recommender:
+  ???
