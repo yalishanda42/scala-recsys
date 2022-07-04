@@ -1,15 +1,13 @@
 package domains.movielens.algorithms
 
-import org.apache.spark.mllib.recommendation.{ALS, Rating, MatrixFactorizationModel}
-import org.apache.spark.rdd.RDD
+import org.apache.spark.mllib.recommendation.{MatrixFactorizationModel, Rating}
 
-import traits.Trainable
+import traits.Algorithm
+import domains.movielens.datatransformers.MovieLensTransformerV1
+import domains.movielens.trainables.ALSTrainer
+import shared.testables.MatrixFactorizationModelTester
 
-final class MovieRecommenderV1(
-  rank: Int = 50,
-  iterations: Int = 100,
-  lambda: Double = 0.1
-) extends Trainable[Rating, MatrixFactorizationModel]:
-
-  def train(data: RDD[Rating]): MatrixFactorizationModel =
-    ALS.train(data, rank, iterations, lambda)
+case class MovieRecommenderV1() extends Algorithm[Rating, MatrixFactorizationModel]:
+  lazy val transformer = MovieLensTransformerV1()
+  lazy val trainer = ALSTrainer()
+  lazy val tester = MatrixFactorizationModelTester()

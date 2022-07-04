@@ -1,11 +1,12 @@
 import cats.effect.{ExitCode, IO, IOApp}
 import scala.util.{Try, Success, Failure}
 import org.apache.spark.SparkContext
-import org.apache.spark.mllib.recommendation.MatrixFactorizationModel
+import org.apache.spark.mllib.recommendation.{MatrixFactorizationModel, Rating}
 
 import utils.*
 import traits.*
 import shared.dataloaders.*
+import shared.testables.*
 import metrics.*
 import domains.movielens.algorithms.*
 import domains.movielens.dataloaders.*
@@ -15,6 +16,7 @@ object RecommenderApp extends IOApp:
   val logger = Logger("===> [RecommenderApp]")
 
   // TODO: use argv
+  val algo: Algorithm[Rating, MatrixFactorizationModel] = MovieRecommenderV1()
   val dataPath =  "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data"
   val modelPath = "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/ALSmodel"
 
@@ -36,15 +38,15 @@ object RecommenderApp extends IOApp:
 
 
   def train(sc: SparkContext): IO[ExitCode] =
-    val loader = new MovieLensRatingsLoader(sc)
-    val trainer = new MovieRecommenderV1
     val result = for {
       _ <- logger.logInfo("Preparing data...")
       _ <- IO(sc.setCheckpointDir(s"$modelPath/checkpoint"))
-      data <- IO(loader.loadData(dataPath))
+      rawData <- IO(sc.textFile(dataPath))
+      data <- IO(algo.transformer.preprocess(rawData))
       _ <- IO(data.checkpoint)
+      split <- IO(algo.transformer.split(data))
       _ <- logger.logInfo("Training model...")
-      model <- IO(trainer.train(data))
+      model <- IO(algo.trainer.train(split.train))
       _ <- logger.logInfo("Saving model...")
       result <- IO(Try(model.save(sc, modelPath)))
     } yield result
@@ -57,13 +59,12 @@ object RecommenderApp extends IOApp:
     }
 
   def test(sc: SparkContext): IO[ExitCode] =
-    val loader = new MovieLensRatingsLoader(sc)
     val result = for {
       model <- Try(MatrixFactorizationModel.load(sc, modelPath))
-      dataset <- Try(loader.loadData(dataPath))
+      rawDataset <- Try(sc.textFile(dataPath))
+      processedDataSet <- Try(algo.transformer.preprocess(rawDataset))
       _ <- Try(logger.logInfo("Testing model..."))
-      predictions <- Try(model.predict(dataset.map(r => (r.user, r.product))))
-      rmse <- Try(RMSE(dataset, predictions).evaluate)
+      rmse <- Try(algo.tester.test(model, RMSE(), processedDataSet))
     } yield rmse
 
     result match
