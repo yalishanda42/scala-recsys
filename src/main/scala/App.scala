@@ -50,12 +50,17 @@ object RecommenderApp extends IOApp:
           } yield ExitCode.Success
         }
 
-      case List("predict") =>
-        logger.logInfo("Predicting mode.")
-          .as(ExitCode.Success)
+      case List("recommend", mode, id) =>
+        SparkProvider.sparkContext("Recommending").use { sc =>
+          for {
+            model <- loadModel(sc, modelPath)
+            recommendations <- recommend(sc, model, mode, id)
+            _ <- logger.logInfo(s"Recommendations: $recommendations")
+          } yield ExitCode.Success
+        }
 
       case _ =>
-        logger.logError("Usage: RecommenderApp train|test|predict")
+        logger.logError("Usage: RecommenderApp train | test | predict [-u|-m <id>]")
           .as(ExitCode.Error)
 
 
@@ -98,3 +103,32 @@ object RecommenderApp extends IOApp:
       _ <- logger.logInfo("Testing model...")
       rmse <- IO(algo.tester.test(model, metric, data))
     } yield rmse
+
+  def recommend(
+    sc: SparkContext,
+    model: MatrixFactorizationModel,
+    mode: String,
+    id: String
+  ): IO[List[Rating]] =
+    mode match
+      case "-u" =>
+        recommendMovies(sc, model, id)
+      case "-m" =>
+        recommendUsers(sc, model, id)
+      case other =>
+        logger.logError(s"Unrecognized option $other!\nUsage: RecommenderApp recommend -u|-m <id>")
+          .as(List())
+
+  def recommendMovies(sc: SparkContext, model: MatrixFactorizationModel, id: String): IO[List[Rating]] =
+    val count = 10
+    for {
+      _ <- logger.logInfo(s"Recommending $count movies for user $id...")
+      recommendations <- IO(model.recommendProducts(id.toInt, count))
+    } yield recommendations.toList
+
+  def recommendUsers(sc: SparkContext, model: MatrixFactorizationModel, id: String): IO[List[Rating]] =
+    val count = 10
+    for {
+      _ <- logger.logInfo(s"Recommending $count users for movie $id...")
+      recommendations <- IO(model.recommendUsers(id.toInt, count))
+    } yield recommendations.toList
