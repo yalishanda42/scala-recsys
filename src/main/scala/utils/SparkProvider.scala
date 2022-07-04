@@ -1,4 +1,6 @@
-import cats.effect.*
+package utils
+
+import cats.effect.{Resource, IO}
 import org.apache.spark.{SparkConf, SparkContext}
 
 object SparkProvider:

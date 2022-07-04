@@ -3,6 +3,13 @@ import scala.util.{Try, Success, Failure}
 import org.apache.spark.SparkContext
 import org.apache.spark.mllib.recommendation.MatrixFactorizationModel
 
+import utils.*
+import traits.*
+import shared.dataloaders.*
+import metrics.*
+import domains.movielens.algorithms.*
+import domains.movielens.dataloaders.*
+
 object RecommenderApp extends IOApp:
 
   // TODO: use argv
@@ -27,16 +34,17 @@ object RecommenderApp extends IOApp:
 
 
   def train(sc: SparkContext): IO[ExitCode] =
-    val trainer = Trainer(sc, dataPath, modelPath)
+    val loader = new MovieLensRatingsLoader(sc)
+    val trainer = new MovieRecommenderV1
     val result = for {
       _ <- IO(println("Preparing data..."))
       _ <- IO(sc.setCheckpointDir("/Users/yalishanda/Documents/scala-recsys/data/ml-100k/checkpoint"))
-      data <- IO(trainer.prepareData(Utils.stringToRatingMapper))
+      data <- IO(loader.loadData(dataPath))
       _ <- IO(data.checkpoint)
       _ <- IO(println("Training model..."))
       model <- IO(trainer.train(data))
       _ <- IO(println("Saving model..."))
-      result <- IO(trainer.saveModel(model))
+      result <- IO(Try(model.save(sc, modelPath)))
     } yield result
 
     result.flatMap {
@@ -47,12 +55,13 @@ object RecommenderApp extends IOApp:
     }
 
   def test(sc: SparkContext): IO[ExitCode] =
+    val loader = new MovieLensRatingsLoader(sc)
     val result = for {
       model <- Try(MatrixFactorizationModel.load(sc, modelPath))
-      dataset <- Try(sc.textFile(dataPath).map(Utils.stringToRatingMapper))
+      dataset <- Try(loader.loadData(dataPath))
       _ <- Try(println("Testing model..."))
       predictions <- Try(model.predict(dataset.map(r => (r.user, r.product))))
-      rmse <- Try(Metrics.rmse(dataset, predictions))
+      rmse <- Try(RMSE(dataset, predictions).evaluate)
     } yield rmse
 
     result match
