@@ -14,6 +14,17 @@
             "env": {}
         },
         {
+          "type": "scala",
+          "request": "launch",
+          "name": "Test",
+          "mainClass": "RecommenderApp",
+          "args": [
+            "test"
+          ],
+          "jvmOptions": [],
+          "env": {}
+        },
+        {
             "type": "scala",
             "request": "launch",
             "name": "Predict",
