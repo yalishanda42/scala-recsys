@@ -7,4 +7,4 @@ import traits.Trainable
 
 final case class ALSTrainer() extends Trainable[Rating, MatrixFactorizationModel]:
   def train(data: RDD[Rating]): MatrixFactorizationModel =
-    ALS.train(data, 50, 100, 0.1)
+    ALS.train(data, 50, 20, 0.1)
