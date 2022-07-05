@@ -4,43 +4,249 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
-            "type": "scala",
-            "request": "launch",
-            "name": "train",
-            "mainClass": "RecommenderApp",
-            "args": ["train"],
-            "jvmOptions": [],
-            "env": {}
-        },
-        {
-          "type": "scala",
-          "request": "launch",
-          "name": "test",
-          "mainClass": "RecommenderApp",
-          "args": [
-            "test"
-          ],
-          "jvmOptions": [],
-          "env": {}
-        },
-        {
-            "type": "scala",
-            "request": "launch",
-            "name": "recommend -u 1",
-            "mainClass": "RecommenderApp",
-            "args": ["recommend", "-u", "1"],
-            "jvmOptions": [],
-            "env": {}
-        },
-        {
-          "type": "scala",
-          "request": "launch",
-          "name": "recommend -m 1",
-          "mainClass": "RecommenderApp",
-          "args": [ "recommend", "-m", "1"],
-          "jvmOptions": [],
-          "env": {}
-        }
+      // movielens-v1
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "movielens-v1 train",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "movielens-v1",
+          "train",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "movielens-v1 test",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "movielens-v1",
+          "test",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "movielens-v1 recommend -u 1",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "movielens-v1",
+          "recommend",
+          "-u",
+          "1",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "movielens-v1 recommend -m 1",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "movielens-v1",
+          "recommend",
+          "-m",
+          "1",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      // movielens-v2
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "movielens-v2 train",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "movielens-v2",
+          "train",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "movielens-v2 test",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "movielens-v2",
+          "test",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "movielens-v2 recommend -u 1",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "movielens-v2",
+          "recommend",
+          "-u",
+          "1",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "movielens-v2 recommend -m 1",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "movielens-v2",
+          "recommend",
+          "-m",
+          "1",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      // movielens-v3
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "movielens-v3 train",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "movielens-v3",
+          "train",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "movielens-v3 test",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "movielens-v3",
+          "test",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "movielens-v3 recommend -u 1",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "movielens-v3",
+          "recommend",
+          "-u",
+          "1",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "movielens-v3 recommend -m 1",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "movielens-v3",
+          "recommend",
+          "-m",
+          "1",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
+          "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      // books-v1
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "books-v1 train",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "books-v1",
+          "train",
+          "/Users/yalishanda/Documents/scala-recsys/data/books/ratings.csv",
+          "/Users/yalishanda/Documents/scala-recsys/data/books/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "books-v1 test",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "books-v1",
+          "test",
+          "/Users/yalishanda/Documents/scala-recsys/data/books/ratings.csv",
+          "/Users/yalishanda/Documents/scala-recsys/data/books/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "books-v1 recommend -u 1",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "books-v1",
+          "recommend",
+          "-u",
+          "1",
+          "/Users/yalishanda/Documents/scala-recsys/data/books/ratings.csv",
+          "/Users/yalishanda/Documents/scala-recsys/data/books/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      },
+      {
+        "type": "scala",
+        "request": "launch",
+        "name": "books-v1 recommend -m 1",
+        "mainClass": "RecommenderApp",
+        "args": [
+          "books-v1",
+          "recommend",
+          "-m",
+          "1",
+          "/Users/yalishanda/Documents/scala-recsys/data/books/ratings.csv",
+          "/Users/yalishanda/Documents/scala-recsys/data/books/model"
+        ],
+        "jvmOptions": [],
+        "env": {}
+      }
     ]
 }

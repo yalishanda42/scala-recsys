@@ -17,47 +17,49 @@ import domains.restaurants.algorithms.*
 import domains.restaurants.datatransformers.*
 import domains.books.algorithms.*
 import domains.books.datatransformers.*
+import registry.AlgorithmsRegistry
 
 object RecommenderApp extends IOApp:
 
   val logger = Logger("===> [RecommenderApp]")
 
-  // TODO: use argv
-  // val algo: Algorithm[Rating, MatrixFactorizationModel] = MovieRecommenderV2()
-  val algo: Algorithm[Rating, MatrixFactorizationModel] = BooksRecommenderV1()
-  // val dataPath = "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data"
-  // val basePath = "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/ALSmodel"
-  val dataPath = "/Users/yalishanda/Documents/scala-recsys/data/books/ratings.csv"
-  val basePath = "/Users/yalishanda/Documents/scala-recsys/data/books/model"
-  val modelPath = s"$basePath/model"
-  val checkpointPath = s"$basePath/checkpoint"
+  // val dataPath = "/Users/yalishanda/Documents/scala-recsys/data/books/ratings.csv"
+  // val basePath = "/Users/yalishanda/Documents/scala-recsys/data/books/model"
+  def modelSubpath(basePath: String) = s"$basePath/model"
+  def checkpointSubpath(basePath: String) = s"$basePath/checkpoint"
 
   def run(args: List[String]): IO[ExitCode] =
     args.match
-      case List("train") =>
+      case List(algorithm, "train", dataPath, modelBasePath) =>
+        val algo = AlgorithmsRegistry(algorithm)
+        val modelPath = modelSubpath(modelBasePath)
         SparkProvider.sparkContext("Training").use { sc =>
           for {
-            data <- loadData(sc)
+            data <- loadData(sc, dataPath, modelBasePath, algo.transformer)
             split <- IO(algo.transformer.split(data))
-            model <- train(sc, split.train)
+            model <- train(sc, split.train, algo.trainer)
             _ <- saveModel(sc, model, modelPath)
             loadedModel <- loadModel(sc, modelPath)
-            rmse <- test(sc, loadedModel, split.test)
+            rmse <- test(sc, loadedModel, split.test, algo.tester)
             _ <- logger.logInfo(s"RMSE: $rmse")
           } yield ExitCode.Success
         }
 
-      case List("test") =>
+      case List(algorithm, "test", dataPath, modelBasePath) =>
+        val algo = AlgorithmsRegistry(algorithm)
+        val modelPath = modelSubpath(modelBasePath)
         SparkProvider.sparkContext("Testing").use { sc =>
           for {
-            data <- loadData(sc)
+            data <- loadData(sc, dataPath, modelBasePath, algo.transformer)
             model <- loadModel(sc, modelPath)
-            rmse <- test(sc, model, data)
+            rmse <- test(sc, model, data, algo.tester)
             _ <- logger.logInfo(s"RMSE: $rmse")
           } yield ExitCode.Success
         }
 
-      case List("recommend", mode, id) =>
+      case List(algorithm, "recommend", mode, id, dataPath, modelBasePath) =>
+        val algo = AlgorithmsRegistry(algorithm)
+        val modelPath = modelSubpath(modelBasePath)
         SparkProvider.sparkContext("Recommending").use { sc =>
           for {
             model <- loadModel(sc, modelPath)
@@ -67,30 +69,39 @@ object RecommenderApp extends IOApp:
         }
 
       case _ =>
-        logger.logError("Usage: RecommenderApp train | test | predict [-u|-m <id>]")
+        logger.logError("Usage: RecommenderApp domain-v? train|test|predict [-u|-m <id>] dataPath modelBasePath")
           .as(ExitCode.Error)
 
 
-  def loadData(sc: SparkContext): IO[RDD[Rating]] =
+  def loadData(
+    sc: SparkContext,
+    dataPath: String,
+    modelBasePath: String,
+    transformer: DataTransformer[Rating]
+  ): IO[RDD[Rating]] =
     for {
       _ <- logger.logInfo("Loading data...")
-      _ <- IO(sc.setCheckpointDir(checkpointPath))
+      _ <- IO(sc.setCheckpointDir(checkpointSubpath(modelBasePath)))
       rawData <- IO(sc.textFile(dataPath))
-      data <- IO(algo.transformer.preprocess(rawData))
+      data <- IO(transformer.preprocess(rawData))
       _ <- IO(data.checkpoint)
     } yield data
 
-  def train(sc: SparkContext, data: RDD[Rating]): IO[MatrixFactorizationModel] =
+  def train(
+    sc: SparkContext,
+    data: RDD[Rating],
+    trainer: Trainable[Rating, MatrixFactorizationModel]
+  ): IO[MatrixFactorizationModel] =
     for {
       _ <- logger.logInfo("Training model...")
-      model <- IO(algo.trainer.train(data))
+      model <- IO(trainer.train(data))
     } yield model
 
-  def saveModel(sc: SparkContext, model: MatrixFactorizationModel, path: String): IO[Unit] =
+  def saveModel(sc: SparkContext, model: MatrixFactorizationModel, modelPath: String): IO[Unit] =
     for {
-      _ <- logger.logInfo(s"Deleting $path...")
-      _ <- IO(new Directory(new File(path)).deleteRecursively())
-      _ <- logger.logInfo(s"Saving model to $path...")
+      _ <- logger.logInfo(s"Deleting $modelPath...")
+      _ <- IO(new Directory(new File(modelPath)).deleteRecursively())
+      _ <- logger.logInfo(s"Saving model to $modelPath...")
       _ <- IO(model.save(sc, modelPath))
     } yield ()
 
@@ -104,11 +115,12 @@ object RecommenderApp extends IOApp:
     sc: SparkContext,
     model: MatrixFactorizationModel,
     data: RDD[Rating],
+    tester: Testable[Rating, MatrixFactorizationModel],
     metric: Metric = RMSE()
   ): IO[Double] =
     for {
       _ <- logger.logInfo("Testing model...")
-      rmse <- IO(algo.tester.test(model, metric, data))
+      rmse <- IO(tester.test(model, metric, data))
     } yield rmse
 
   def recommend(
