@@ -4,7 +4,7 @@ import org.apache.spark.mllib.recommendation.{MatrixFactorizationModel, Rating}
 
 import traits.Algorithm
 import domains.movielens.datatransformers.MovieLensTransformer
-import domains.movielens.trainables.ALSTrainer
+import shared.trainables.ALSTrainer
 import shared.testables.MatrixFactorizationModelTester
 
 case class MovieRecommenderV2() extends Algorithm[Rating, MatrixFactorizationModel]:

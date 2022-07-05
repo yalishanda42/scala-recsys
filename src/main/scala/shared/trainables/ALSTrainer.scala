@@ -1,4 +1,4 @@
-package domains.movielens.trainables
+package shared.trainables
 
 import org.apache.spark.mllib.recommendation.{ALS, Rating, MatrixFactorizationModel}
 import org.apache.spark.rdd.RDD

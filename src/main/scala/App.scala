@@ -12,16 +12,23 @@ import shared.dataloaders.*
 import shared.testables.*
 import metrics.*
 import domains.movielens.algorithms.*
-import domains.movielens.dataloaders.*
+import domains.movielens.datatransformers.*
+import domains.restaurants.algorithms.*
+import domains.restaurants.datatransformers.*
+import domains.books.algorithms.*
+import domains.books.datatransformers.*
 
 object RecommenderApp extends IOApp:
 
   val logger = Logger("===> [RecommenderApp]")
 
   // TODO: use argv
-  val algo: Algorithm[Rating, MatrixFactorizationModel] = MovieRecommenderV2()
-  val dataPath = "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data"
-  val basePath = "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/ALSmodel"
+  // val algo: Algorithm[Rating, MatrixFactorizationModel] = MovieRecommenderV2()
+  val algo: Algorithm[Rating, MatrixFactorizationModel] = BooksRecommenderV1()
+  // val dataPath = "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data"
+  // val basePath = "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/ALSmodel"
+  val dataPath = "/Users/yalishanda/Documents/scala-recsys/data/books/ratings.csv"
+  val basePath = "/Users/yalishanda/Documents/scala-recsys/data/books/model"
   val modelPath = s"$basePath/model"
   val checkpointPath = s"$basePath/checkpoint"
 

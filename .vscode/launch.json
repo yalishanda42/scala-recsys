@@ -4,11 +4,10 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
             "type": "scala",
             "request": "launch",
-            "name": "Train",
+            "name": "train",
             "mainClass": "RecommenderApp",
             "args": ["train"],
             "jvmOptions": [],
@@ -17,7 +16,7 @@
         {
           "type": "scala",
           "request": "launch",
-          "name": "Test",
+          "name": "test",
           "mainClass": "RecommenderApp",
           "args": [
             "test"
@@ -28,7 +27,7 @@
         {
             "type": "scala",
             "request": "launch",
-            "name": "Recommend to user",
+            "name": "recommend -u 1",
             "mainClass": "RecommenderApp",
             "args": ["recommend", "-u", "1"],
             "jvmOptions": [],
@@ -37,7 +36,7 @@
         {
           "type": "scala",
           "request": "launch",
-          "name": "Recommend users for movie",
+          "name": "recommend -m 1",
           "mainClass": "RecommenderApp",
           "args": [ "recommend", "-m", "1"],
           "jvmOptions": [],
