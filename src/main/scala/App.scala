@@ -33,7 +33,7 @@ object RecommenderApp extends IOApp:
             data <- loadData(sc)
             split <- IO(algo.transformer.split(data))
             model <- train(sc, split.train)
-            - <- saveModel(sc, model, modelPath)
+            _ <- saveModel(sc, model, modelPath)
             loadedModel <- loadModel(sc, modelPath)
             rmse <- test(sc, loadedModel, split.test)
             _ <- logger.logInfo(s"RMSE: $rmse")
