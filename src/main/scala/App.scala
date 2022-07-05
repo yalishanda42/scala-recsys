@@ -19,7 +19,7 @@ object RecommenderApp extends IOApp:
   val logger = Logger("===> [RecommenderApp]")
 
   // TODO: use argv
-  val algo: Algorithm[Rating, MatrixFactorizationModel] = MovieRecommenderV1()
+  val algo: Algorithm[Rating, MatrixFactorizationModel] = MovieRecommenderV2()
   val dataPath = "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data"
   val basePath = "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/ALSmodel"
   val modelPath = s"$basePath/model"

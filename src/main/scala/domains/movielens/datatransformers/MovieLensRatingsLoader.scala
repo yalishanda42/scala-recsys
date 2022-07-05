@@ -7,7 +7,7 @@ import scala.util.Try
 
 import traits.{DataTransformer, Split}
 
-case class MovieLensTransformerV1() extends DataTransformer[Rating]:
+case class MovieLensTransformer() extends DataTransformer[Rating]:
 
   def preprocess(data: RDD[String]): RDD[Rating] =
     data.map { line =>
