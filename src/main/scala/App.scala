@@ -21,77 +21,100 @@ import domains.books.algorithms.*
 import domains.books.datatransformers.*
 import registry.AlgorithmsRegistry
 
+enum RecommendationMode:
+  case RecommendUsers
+  case RecommendItems
+
+object RecommendationMode:
+  def unapply(rawValue: String): Option[RecommendationMode] = rawValue.trim.toLowerCase match
+    case "-u" => Some(RecommendUsers)
+    case "-i" => Some(RecommendItems)
+    case _ => None
+
+enum Subcommand:
+  case Train
+  case Test
+  case Recommend(mode: RecommendationMode, id: String)
+
+object Subcommand:
+  def apply(rawValue: List[String]): Option[Subcommand] = rawValue.map(_.trim.toLowerCase) match
+    case List("train") => Some(Train)
+    case List("test") => Some(Test)
+    case List("recommend", RecommendationMode(mode), id) => Some(Recommend(mode, id))
+    case _ => None
+
+case class ArgumentParser(args: List[String]):
+  lazy val algorithm = args.lift(0).flatMap(AlgorithmsRegistry.apply)
+  lazy val subcommand = Subcommand(args.drop(1).dropRight(2))
+  lazy val dataPath = args.lift(args.length - 2) // second to last
+  lazy val modelBasePath = args.last.some
+
 object RecommenderApp extends IOApp:
 
   val logger = Logger("===> [RecommenderApp]")
 
-  // val dataPath = "/Users/yalishanda/Documents/scala-recsys/data/books/ratings.csv"
-  // val basePath = "/Users/yalishanda/Documents/scala-recsys/data/books/model"
   def modelSubpath(basePath: String) = s"$basePath/model"
   def checkpointSubpath(basePath: String) = s"$basePath/checkpoint"
 
   def run(args: List[String]): IO[ExitCode] =
-    args.match
-      case List(algorithm, "train", dataPath, modelBasePath) =>
-        val algo = AlgorithmsRegistry(algorithm)
-        val modelPath = modelSubpath(modelBasePath)
-        SparkProvider.sparkContext("Training").use { sc =>
-          val result = for {
-            data <- loadData(sc, dataPath, modelBasePath, algo.transformer).attemptT
-            split <- IO(algo.transformer.split(data)).attemptT
-            model <- train(sc, split.train, algo.trainer).attemptT
-            _ <- saveModel(sc, model, modelPath).attemptT
-            loadedModel <- loadModel(sc, modelPath).attemptT
-            rmse <- test(sc, loadedModel, split.test, algo.tester).attemptT
-            result <- EitherT.liftF(logger.logInfo(s"RMSE: $rmse"))
-          } yield result
-          result.value.flatMap {
-            case Right(_) =>
-              IO.pure(ExitCode.Success)
-            case Left(e) =>
-              logger.logError(s"Terminating with error: $e").as(ExitCode.Error)
-          }
-        }
+    val parser = ArgumentParser(args)
+    val result = for {
+      s <- parser.subcommand
+      a <- parser.algorithm
+      d <- parser.dataPath
+      m <- parser.modelBasePath
+    } yield {
+      SparkProvider.sparkContext("RecommenderApp").use { sc =>
+        runSubcommand(sc, s, a, d, m).attemptT.value
+      }
+    }
 
-      case List(algorithm, "test", dataPath, modelBasePath) =>
-        val algo = AlgorithmsRegistry(algorithm)
-        val modelPath = modelSubpath(modelBasePath)
-        SparkProvider.sparkContext("Testing").use { sc =>
-          val result = for {
-            data <- loadData(sc, dataPath, modelBasePath, algo.transformer).attemptT
-            model <- loadModel(sc, modelPath).attemptT
-            rmse <- test(sc, model, data, algo.tester).attemptT
-            result <- EitherT.liftF(logger.logInfo(s"RMSE: $rmse"))
-          } yield result
-          result.value.flatMap {
+    result match
+      case Some(ioOfEither) =>
+        ioOfEither.flatMap {
           case Right(_) =>
-            IO.pure(ExitCode.Success)
-          case Left(e) =>
-            logger.logError(s"Terminating with error: $e").as(ExitCode.Error)
-          }
+            logger.logInfo("Done.").as(ExitCode.Success)
+          case Left(error) =>
+            logger.logError(error.getMessage).as(ExitCode.Error)
         }
-
-      case List(algorithm, "recommend", mode, id, dataPath, modelBasePath) =>
-        val algo = AlgorithmsRegistry(algorithm)
-        val modelPath = modelSubpath(modelBasePath)
-        SparkProvider.sparkContext("Recommending").use { sc =>
-          val result = for {
-            model <- loadModel(sc, modelPath).attemptT
-            recommendations <- recommend(sc, model, mode, id).attemptT
-            result <- EitherT.liftF(logger.logInfo(s"Recommendations: $recommendations"))
-          } yield result
-          result.value.flatMap {
-            case Right(_) =>
-              IO.pure(ExitCode.Success)
-            case Left(e) =>
-              logger.logError(s"Terminating with error: $e").as(ExitCode.Error)
-          }
-        }
-
-      case _ =>
+      case None =>
         logger.logError("Usage: RecommenderApp domain-v? train|test|predict [-u|-m <id>] dataPath modelBasePath")
           .as(ExitCode.Error)
 
+  def runSubcommand(
+    sc: SparkContext,
+    subcommand: Subcommand,
+    algo: Algorithm[Rating, MatrixFactorizationModel],
+    dataPath: String,
+    modelBasePath: String
+  ): IO[Unit] =
+    val modelPath = modelSubpath(modelBasePath)
+    subcommand match
+      case Subcommand.Train =>
+        for {
+          data <- loadData(sc, dataPath, modelBasePath, algo.transformer)
+          split <- IO(algo.transformer.split(data))
+          model <- train(sc, split.train, algo.trainer)
+          _ <- saveModel(sc, model, modelPath)
+          loadedModel <- loadModel(sc, modelPath)
+          rmse <- test(sc, loadedModel, split.test, algo.tester)
+          result <- logger.logInfo(s"RMSE: $rmse")
+        } yield result
+
+      case Subcommand.Test =>
+        for {
+          data <- loadData(sc, dataPath, modelBasePath, algo.transformer)
+          model <- loadModel(sc, modelPath)
+          rmse <- test(sc, model, data, algo.tester)
+          result <- logger.logInfo(s"RMSE: $rmse")
+        } yield result
+
+      case Subcommand.Recommend(mode, id) =>
+        for {
+          model <- loadModel(sc, modelPath)
+          recommendations <- recommend(sc, model, mode, id)
+          result <- logger.logInfo(s"Recommendations: $recommendations")
+        } yield result
 
   def loadData(
     sc: SparkContext,
@@ -146,27 +169,25 @@ object RecommenderApp extends IOApp:
   def recommend(
     sc: SparkContext,
     model: MatrixFactorizationModel,
-    mode: String,
+    mode: RecommendationMode,
     id: String
   ): IO[List[Rating]] =
     mode match
-      case "-u" =>
-        recommendMovies(sc, model, id)
-      case "-m" =>
+      case RecommendationMode.RecommendItems =>
+        recommendItems(sc, model, id)
+      case RecommendationMode.RecommendUsers =>
         recommendUsers(sc, model, id)
-      case other =>
-        IO.raiseError(new RuntimeException(s"Unrecognized option $other!\nUsage: RecommenderApp recommend -u|-m <id>"))
 
-  def recommendMovies(sc: SparkContext, model: MatrixFactorizationModel, id: String): IO[List[Rating]] =
+  def recommendItems(sc: SparkContext, model: MatrixFactorizationModel, id: String): IO[List[Rating]] =
     val count = 10
     for {
-      _ <- logger.logInfo(s"Recommending $count movies for user $id...")
+      _ <- logger.logInfo(s"Recommending $count items for user $id...")
       recommendations <- IO(model.recommendProducts(id.toInt, count))
     } yield recommendations.toList
 
   def recommendUsers(sc: SparkContext, model: MatrixFactorizationModel, id: String): IO[List[Rating]] =
     val count = 10
     for {
-      _ <- logger.logInfo(s"Recommending $count users for movie $id...")
+      _ <- logger.logInfo(s"Recommending $count users for item $id...")
       recommendations <- IO(model.recommendUsers(id.toInt, count))
     } yield recommendations.toList

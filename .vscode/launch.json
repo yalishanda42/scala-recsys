@@ -52,12 +52,12 @@
       {
         "type": "scala",
         "request": "launch",
-        "name": "movielens-v1 recommend -m 1",
+        "name": "movielens-v1 recommend -i 1",
         "mainClass": "RecommenderApp",
         "args": [
           "movielens-v1",
           "recommend",
-          "-m",
+          "-i",
           "1",
           "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
           "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
@@ -113,12 +113,12 @@
       {
         "type": "scala",
         "request": "launch",
-        "name": "movielens-v2 recommend -m 1",
+        "name": "movielens-v2 recommend -i 1",
         "mainClass": "RecommenderApp",
         "args": [
           "movielens-v2",
           "recommend",
-          "-m",
+          "-i",
           "1",
           "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
           "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
@@ -174,12 +174,12 @@
       {
         "type": "scala",
         "request": "launch",
-        "name": "movielens-v3 recommend -m 1",
+        "name": "movielens-v3 recommend -i 1",
         "mainClass": "RecommenderApp",
         "args": [
           "movielens-v3",
           "recommend",
-          "-m",
+          "-i",
           "1",
           "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/u.data",
           "/Users/yalishanda/Documents/scala-recsys/data/ml-100k/model"
@@ -235,12 +235,12 @@
       {
         "type": "scala",
         "request": "launch",
-        "name": "books-v1 recommend -m 1",
+        "name": "books-v1 recommend -i 1",
         "mainClass": "RecommenderApp",
         "args": [
           "books-v1",
           "recommend",
-          "-m",
+          "-i",
           "1",
           "/Users/yalishanda/Documents/scala-recsys/data/books/ratings.csv",
           "/Users/yalishanda/Documents/scala-recsys/data/books/model"
