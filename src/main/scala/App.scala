@@ -1,4 +1,6 @@
 import cats.effect.{ExitCode, IO, IOApp}
+import cats.data.EitherT
+import cats.implicits.*
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.mllib.recommendation.{MatrixFactorizationModel, Rating}
@@ -34,38 +36,56 @@ object RecommenderApp extends IOApp:
         val algo = AlgorithmsRegistry(algorithm)
         val modelPath = modelSubpath(modelBasePath)
         SparkProvider.sparkContext("Training").use { sc =>
-          for {
-            data <- loadData(sc, dataPath, modelBasePath, algo.transformer)
-            split <- IO(algo.transformer.split(data))
-            model <- train(sc, split.train, algo.trainer)
-            _ <- saveModel(sc, model, modelPath)
-            loadedModel <- loadModel(sc, modelPath)
-            rmse <- test(sc, loadedModel, split.test, algo.tester)
-            _ <- logger.logInfo(s"RMSE: $rmse")
-          } yield ExitCode.Success
+          val result = for {
+            data <- loadData(sc, dataPath, modelBasePath, algo.transformer).attemptT
+            split <- IO(algo.transformer.split(data)).attemptT
+            model <- train(sc, split.train, algo.trainer).attemptT
+            _ <- saveModel(sc, model, modelPath).attemptT
+            loadedModel <- loadModel(sc, modelPath).attemptT
+            rmse <- test(sc, loadedModel, split.test, algo.tester).attemptT
+            result <- EitherT.liftF(logger.logInfo(s"RMSE: $rmse"))
+          } yield result
+          result.value.flatMap {
+            case Right(_) =>
+              IO.pure(ExitCode.Success)
+            case Left(e) =>
+              logger.logError(s"Terminating with error: $e").as(ExitCode.Error)
+          }
         }
 
       case List(algorithm, "test", dataPath, modelBasePath) =>
         val algo = AlgorithmsRegistry(algorithm)
         val modelPath = modelSubpath(modelBasePath)
         SparkProvider.sparkContext("Testing").use { sc =>
-          for {
-            data <- loadData(sc, dataPath, modelBasePath, algo.transformer)
-            model <- loadModel(sc, modelPath)
-            rmse <- test(sc, model, data, algo.tester)
-            _ <- logger.logInfo(s"RMSE: $rmse")
-          } yield ExitCode.Success
+          val result = for {
+            data <- loadData(sc, dataPath, modelBasePath, algo.transformer).attemptT
+            model <- loadModel(sc, modelPath).attemptT
+            rmse <- test(sc, model, data, algo.tester).attemptT
+            result <- EitherT.liftF(logger.logInfo(s"RMSE: $rmse"))
+          } yield result
+          result.value.flatMap {
+          case Right(_) =>
+            IO.pure(ExitCode.Success)
+          case Left(e) =>
+            logger.logError(s"Terminating with error: $e").as(ExitCode.Error)
+          }
         }
 
       case List(algorithm, "recommend", mode, id, dataPath, modelBasePath) =>
         val algo = AlgorithmsRegistry(algorithm)
         val modelPath = modelSubpath(modelBasePath)
         SparkProvider.sparkContext("Recommending").use { sc =>
-          for {
-            model <- loadModel(sc, modelPath)
-            recommendations <- recommend(sc, model, mode, id)
-            _ <- logger.logInfo(s"Recommendations: $recommendations")
-          } yield ExitCode.Success
+          val result = for {
+            model <- loadModel(sc, modelPath).attemptT
+            recommendations <- recommend(sc, model, mode, id).attemptT
+            result <- EitherT.liftF(logger.logInfo(s"Recommendations: $recommendations"))
+          } yield result
+          result.value.flatMap {
+            case Right(_) =>
+              IO.pure(ExitCode.Success)
+            case Left(e) =>
+              logger.logError(s"Terminating with error: $e").as(ExitCode.Error)
+          }
         }
 
       case _ =>
@@ -135,8 +155,7 @@ object RecommenderApp extends IOApp:
       case "-m" =>
         recommendUsers(sc, model, id)
       case other =>
-        logger.logError(s"Unrecognized option $other!\nUsage: RecommenderApp recommend -u|-m <id>")
-          .as(List())
+        IO.raiseError(new RuntimeException(s"Unrecognized option $other!\nUsage: RecommenderApp recommend -u|-m <id>"))
 
   def recommendMovies(sc: SparkContext, model: MatrixFactorizationModel, id: String): IO[List[Rating]] =
     val count = 10
