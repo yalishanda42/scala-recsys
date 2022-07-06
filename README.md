@@ -154,7 +154,7 @@ Alternating Least Squares (ALS) алгоритъма разделя дадена
 
 За да се намерят матриците $U$ и $V$ на потребителите и продуктите съответно, трябва да се реши следната задача:
 
-$$\argmin_{U,V} \sum_{\{i,j|r_{i,j}\ne0\}} (r_{i,j} - u_i^T v_j)^2 + \lambda \left( \sum_i n_{u_j} \|u_i\|^2 + \sum_j n_{v_j}\|v_j\|^2 \right)$$
+$$arg\min_{U,V} \sum_{\{i,j|r_{i,j}\ne0\}} (r_{i,j} - u_i^T v_j)^2 + \lambda \left( \sum_i n_{u_j} \|u_i\|^2 + \sum_j n_{v_j}\|v_j\|^2 \right)$$
 
 където:
 
