@@ -214,6 +214,15 @@ $$\argmin_{U,V} \sum_{\{i,j|r_{i,j}\ne0\}} (r_{i,j} - u_i^T v_j)^2 + \lambda \le
 
 Резултат върху пълния набор от данни: $RMSE \approx 1.197$
 
+### Източници
+
+* https://nightlies.apache.org/flink/flink-docs-release-1.6/dev/libs/ml/als.html#description
+* https://link.springer.com/chapter/10.1007/978-3-540-68880-8_32
+* https://dl.acm.org/doi/10.1109/MC.2009.263
+* https://towardsdatascience.com/prototyping-a-recommender-system-step-by-step-part-2-alternating-least-square-als-matrix-4a76c58714a1
+* https://hub.packtpub.com/building-recommendation-system-with-scala-and-apache-spark-tutorial/
+* https://haocai1992.github.io/data/science/2022/01/13/build-recommendation-system-using-scala-spark-and-hadoop.html
+
 ### Бележки
 
 За конвертирането от Markdown в PDF е използвана командата
