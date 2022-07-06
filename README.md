@@ -1,5 +1,5 @@
 # Архитектура на препоръчваща система (Proof of Concept)
-Александър Игнатов, 0MI3400082
+Александър Игнатов, 0MI3400082, 06.07.2022
 
 ## Цел
 Настоящият проект има за цел да демонстрира използването на методите на функционалното програмиране, комбинирано с ООП, за изграждане на скалируема архитектура на препоръчваща система, използваща [Apache Spark](https://spark.apache.org/docs/latest/). Като пример са разработени и няколко модела върху наборите от данни [movelens-100k](https://grouplens.org/datasets/movielens/) и [goodbooks-10k](https://www.kaggle.com/datasets/zygmunt/goodbooks-10k?select=ratings.csv).
@@ -151,6 +151,7 @@ RecommenderApp algorithm train|test|predict [-u|-i <id>] dataPath modelBasePath
 1. `MovieRecommenderV1`
 
 Трениран върху сплит 80%-20% на `movelens-100k` с параметри на ALS:
+
   * $rank = 50$
   * $maxIterations = 20$
   * $\lambda = 0.01$
@@ -162,6 +163,7 @@ RecommenderApp algorithm train|test|predict [-u|-i <id>] dataPath modelBasePath
 2. `MovieRecommenderV2`
 
 Трениран върху сплит 80%-20% на `movelens-100k` с параметри на ALS:
+
   * $rank = 20$
   * $maxIterations = 10$
   * $\lambda = 0.05$
@@ -173,6 +175,7 @@ RecommenderApp algorithm train|test|predict [-u|-i <id>] dataPath modelBasePath
 3. `MovieRecommenderV3`
 
 Трениран върху сплит 80%-20% на `movelens-100k` с оптимизация на хипермараметрите на ALS. Допълнително обучаващия набор от данни е разделен на 90%-10% за обучение и валидация съответно. Избран е моделът с най-добри резултати измежду следните стойности на хиперпараметрите:
+
   * $rank \in \{ 10, 20, 25\}$
   * $maxIterations \in \{ 5, 10, 20 \}$
   * $\lambda \in \{ 0.01, 0.05, 0.1 \}$
@@ -184,6 +187,7 @@ RecommenderApp algorithm train|test|predict [-u|-i <id>] dataPath modelBasePath
 4. `BooksRecommenderV1`
 
 Трениран върху сплит 80%-20% на `goodbooks-10k` с параметри на ALS:
+
   * $rank = 50$
   * $maxIterations = 20$
   * $\lambda = 0.01$
@@ -192,4 +196,10 @@ RecommenderApp algorithm train|test|predict [-u|-i <id>] dataPath modelBasePath
 
 Резултат върху пълния набор от данни: $RMSE \approx 1.197$
 
+### Бележки
 
+За конвертирането от Markdown в PDF е използвана командата
+
+```bash
+pandoc --pdf-engine=xelatex -V mainfont="Arial" README.md -o README.pdf
+```
