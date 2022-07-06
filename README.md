@@ -139,3 +139,53 @@ RecommenderApp algorithm train|test|predict [-u|-i <id>] dataPath modelBasePath
 2. `SparkProvider`
 
 Предоставя безопасен достъп до `SparkContext` чрез ефекта `Resource`.
+
+## Примерни модели и експерименти
+
+Дефинираните в проекта модели използват [алгоритъма Alternating Least Squares](https://dl.acm.org/doi/10.1109/MC.2009.263), чиято [имплементация](https://spark.apache.org/docs/latest/api/scala/org/apache/spark/mllib/recommendation/ALS.html) е предоставена от [библиотеката Spark](https://spark.apache.org/docs/latest/mllib-collaborative-filtering.html#collaborative-filtering).
+
+1. `MovieRecommenderV1`
+
+Трениран върху сплит 80%-20% на `movelens-100k` с параметри на ALS:
+  * $ rank = 50 $
+  * $ maxIterations = 20 $
+  * $ \lambda = 0.01 $
+
+Резултат върху тестови набор от данни: $ RMSE \approx 1.331 $
+
+Резултат върху пълния набор от данни: $ RMSE \approx 1.354 $
+
+2. `MovieRecommenderV2`
+
+Трениран върху сплит 80%-20% на `movelens-100k` с параметри на ALS:
+  * $ rank = 20 $
+  * $ maxIterations = 10 $
+  * $ \lambda = 0.05 $
+
+Резултат върху тестови набор от данни: $ RMSE \approx 1.399 $
+
+Резултат върху пълния набор от данни: $ RMSE \approx 1.409 $
+
+3. `MovieRecommenderV3`
+
+Трениран върху сплит 80%-20% на `movelens-100k` с оптимизация на хипермараметрите на ALS. Допълнително обучаващия набор от данни е разделен на 90%-10% за обучение и валидация съответно. Избран е моделът с най-добри резултати измежду следните стойности на хиперпараметрите:
+  * $ rank \in \{ 10, 20, 25\} $
+  * $ maxIterations \in \{ 5, 10, 20 \} $
+  * $ \lambda \in \{ 0.01, 0.05, 0.1 \} $
+
+Резултат върху тестови набор от данни: $ RMSE \approx 1.330 $
+
+Резултат върху пълния набор от данни: $ RMSE \approx 1.343 $
+
+4. `BooksRecommenderV1`
+
+Трениран върху сплит 80%-20% на `goodbooks-10k` с параметри на ALS:
+  * $ rank = 50 $
+  * $ maxIterations = 20 $
+  * $ \lambda = 0.01 $
+
+Резултат върху тестови набор от данни: $ RMSE \approx 1.197 $
+
+Резултат върху пълния набор от данни: $ RMSE \approx 1.197 $
+
+
