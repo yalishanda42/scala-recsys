@@ -78,7 +78,7 @@ object RecommenderApp extends IOApp:
             logger.logError(error.getMessage).as(ExitCode.Error)
         }
       case None =>
-        logger.logError("Usage: RecommenderApp domain-v? train|test|predict [-u|-m <id>] dataPath modelBasePath")
+        logger.logError("Usage: RecommenderApp domain-v? train|test|predict [-u|-i <id>] dataPath modelBasePath")
           .as(ExitCode.Error)
 
   def runSubcommand(
